@@ -1,0 +1,15 @@
+{
+  "name": "abs-pitch-web",
+  "version": "0.0.1",
+  "description": "A website for measuring absolute pitch reproduction.",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint src/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/unimelbmdap/abs-pitch-web"
+  },
+  "author": "Damien Mannion",
+  "license": "MIT"
+}
