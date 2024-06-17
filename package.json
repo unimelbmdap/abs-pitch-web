@@ -4,6 +4,8 @@
   "description": "A website for measuring absolute pitch reproduction.",
   "main": "index.js",
   "scripts": {
+    "build": "esbuild src/index.js --bundle --minify --outfile=dist/index.js --sourcemap=inline",
+    "serve": "esbuild src/index.js --bundle --minify --outfile=dist/index.js --sourcemap=inline --watch --servedir=dist",
     "lint": "eslint src/*.js"
   },
   "repository": {
@@ -11,5 +13,16 @@
     "url": "https://github.com/unimelbmdap/abs-pitch-web"
   },
   "author": "Damien Mannion",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "esbuild": "^0.21.5"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.2.0"
+  }
 }
