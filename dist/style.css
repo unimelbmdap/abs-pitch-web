@@ -35,10 +35,12 @@ html, body {
     max-width: 800px;
 }
 
+/*
 #pitchOverlayContainer {
   visibility: visible;
   display: flex;
 }
+*/
 
 button {
   font-size: 0.75rem;
