@@ -6,10 +6,62 @@
 
     <title>Absolute pitch reproduction</title>
 
+    <link href="style.css" rel="stylesheet" type="text/css">
+
     <script type="module" src="index.js"></script>
 
   </head>
 
   <body>
+
+    <div id="screenContainer">
+
+      <!-- overlay for the start text -->
+      <div id="startOverlayContainer" class="overlayContainer">
+        <div id="startOverlayContent" class="overlayContent">
+          <p>This is a test!</p>
+          <button id="startButton" type="button">Begin task</button>
+        </div>
+      </div>
+
+      <!-- overlay for the volume -->
+      <div id="volumeOverlayContainer" class="overlayContainer">
+        <div id="volumeOverlayContent" class="overlayContent">
+          <div>
+            <p>
+Please ensure that you are wearing your headphones or earphones if you are not already doing so.
+            </p>
+            <p>
+Use the slider below to set the volume for all the sounds that will be played during the tasks.
+            </p>
+            <p>
+              <span class="bolden">Please be careful to not set it to a level that is too high.</span>
+            </p>
+            <p>
+              Start with a <span class="bolden">very low</span> value, press the <code>Play</code> button, and then adjust the slider.
+              The sound will play in a loop, and you can press the button to toggle between playing and paused.
+            </p>
+            <p>
+              The volume should be set so that the sound that is played is <span class="bolden">loud but not uncomfortable</span>.
+            </p>
+          </div>
+
+          <div>
+            <button id="ppButton" type="button" autofocus>Play</button>
+          </div>
+
+          <div>
+            <input type="range" id="volumeSlider" name="volumeSlider" min="0.0" max="1.0" step="0.001" value="0.1" />
+          </div>
+
+          <div>
+          <button id="volumeContinueButton" type="button" disabled>Continue</button>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
   </body>
 </html>
