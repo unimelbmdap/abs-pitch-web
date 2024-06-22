@@ -27,16 +27,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: actions/setup-node@v3
-      with:
-        node-version: 22.3.0
-        cache: 'npm'
+    #- uses: actions/setup-node@v3
+    #  with:
+    #    node-version: 22.3.0
+    #    cache: 'npm'
 
-    - name: Install deps
-      run: npm install
+    #- name: Install deps
+    #  run: npm install
 
-    - name: Build the site
-      run: npm run build
+    #- name: Build the site
+    #  run: npm run build
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3.0.1

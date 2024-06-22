@@ -35,12 +35,10 @@ html, body {
     max-width: 800px;
 }
 
-/*
-#volumeOverlayContainer {
+#pitchOverlayContainer {
   visibility: visible;
   display: flex;
 }
-*/
 
 button {
   font-size: 0.75rem;
@@ -56,4 +54,12 @@ code, samp, kbd {
 
 .bolden {
     font-weight: bold;
+}
+
+#pitchSlider {
+  width: 725px;
+}
+
+#note {
+  font-size: 64px;
 }

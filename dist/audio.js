@@ -8,16 +8,20 @@ export function initAudio() {
 
   audio.toneNode = audio.context.createOscillator();
   audio.gainNode = audio.context.createGain();
+  audio.masterGainNode = audio.context.createGain();
   audio.noiseNode = audio.context.createBufferSource();
   audio.noiseNode.loop = true;
 
   createNoise(audio);
 
   //audio.toneNode.connect(audio.gainNode);
-  audio.gainNode.connect(audio.context.destination);
+  audio.gainNode.connect(audio.masterGainNode);
+  audio.masterGainNode.connect(audio.context.destination);
 
-  const startVolume = 0.1;
+  const startVolume = 0.05;
   audio.gainNode.gain.value = startVolume;
+
+  audio.masterGainNode.gain.value = 1.0;
 
   return audio;
 

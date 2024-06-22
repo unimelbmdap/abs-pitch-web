@@ -60,8 +60,28 @@ Use the slider below to set the volume for all the sounds that will be played du
         </div>
       </div>
 
+      <!-- overlay for the frequency -->
+      <div id="pitchOverlayContainer" class="overlayContainer">
+        <div id="pitchOverlayContent" class="overlayContent">
+          <div>
+            <p id="note">
+            A♭
+            </p>
+          </div>
+
+          <div id="pitchItems">
+            <div>
+              <input type="range" id="pitchSlider" name="pitchSlider" min="-48" max="2848" step="4" value="0" />
+            </div>
+
+            <div>
+            <button id="pitchContinueButton" type="button">Continue</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
 
     </div>
-
   </body>
 </html>
