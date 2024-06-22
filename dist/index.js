@@ -38,10 +38,116 @@ async function main() {
 
   const trialConfig = {};
 
+  audio.toneNode.start();
+
+  // practice trials
+
+  //let data = await runPractice(audio);
+
+  let data = await runBlock(
+    1,
+    true,
+    audio,
+  );
+
+  let csv = convertToCSV(data);
+
+  saveData(csv);
+
   await runVolumeSetting(audio);
 
-  await runTrial(trialConfig, audio);
 
+}
+
+
+async function runBlock(blockNumber, isPractice, audio, prevNote, prevResponse) {
+
+  prevNote = prevNote ?? randomChoice(Object.keys(NOTES));
+  prevResponse = prevResponse ?? randomChoice(SCALE_CENTS);
+
+  const nTrials = isPractice ? 3 : NOTES.length;
+
+  const sequence = genBlockSequence(
+    prevResponse,
+    isPractice,
+  ).slice(0, nTrials);
+
+  let data = [];
+
+  for (let [iTrial, note] of sequence.entries()) {
+
+    let trialNumber = iTrial + 1;
+
+    let startCents = genStartCents(prevResponse);
+
+    let trialData = await runTrial(
+      note,
+      startCents,
+      blockNumber,
+      trialNumber,
+      isPractice,
+      audio,
+    );
+
+    data.push(trialData);
+
+    prevResponse = trialData.chosenCents;
+
+  }
+
+  return data;
+
+}
+
+async function runPractice(audio) {
+
+  const nPracTrials = 3;
+
+  const practiceSequence = genBlockSequence(
+    randomChoice(Object.keys(NOTES)),
+    true,
+  ).slice(0, nPracTrials);
+
+  let data = [];
+
+  let prevResponse = randomChoice(SCALE_CENTS);
+
+  for (let [iTrial, note] of practiceSequence.entries()) {
+
+    let trialNumber = iTrial + 1;
+
+    let startCents = genStartCents(prevResponse);
+
+    let trialData = await runTrial(
+      note,
+      startCents,
+      1,
+      trialNumber,
+      true,
+      audio,
+    );
+
+    data.push(trialData);
+
+    prevResponse = trialData.chosenCents;
+
+  }
+
+  return data;
+
+}
+
+function saveData(data) {
+
+  const blob = new Blob([data], {type: 'text/csv'});
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+
+  a.href = url;
+  a.download = 'ap_task_results.csv';
+  a.click();
 
 }
 
@@ -74,7 +180,7 @@ function genStartCents(prevResponse) {
 }
 
 
-function genBlockSequence(lastNote) {
+function genBlockSequence(lastNote, isPractice = false) {
 
   const orderedNotes = Object.keys(NOTES);
 
@@ -112,6 +218,14 @@ function genBlockSequence(lastNote) {
         if (iPrevNote == (iCurrNote - 1) || iPrevNote == (iCurrNote + 1)) {
           ok = false;
         }
+      }
+
+      if (isPractice && i <= 3) {
+
+        if (currNote === "A" || currNote === "C" || currNote === "G") {
+          ok = false;
+        }
+
       }
 
     }
@@ -179,7 +293,10 @@ async function runVolumeSetting(audio) {
 }
 
 
-async function runTrial(trialConfig, audio) {
+async function runTrial(note, startCents, blockNumber, trialNumber, isPractice, audio) {
+
+  const timerElement = document.getElementById('timerText');
+  const continueButton = document.getElementById('pitchContinueButton');
 
   audio.toneNode.frequency.value = 196;
   audio.toneNode.connect(audio.gainNode);
@@ -187,8 +304,10 @@ async function runTrial(trialConfig, audio) {
   const pitchItems = document.getElementById('pitchItems');
 
   pitchItems.style.visibility = "hidden";
+  timerElement.style.visibility = "hidden";
 
-  const note = document.getElementById('note');
+  const noteText = document.getElementById('noteText');
+  noteText.innerHTML = note;
 
   function handleSlider(evt) {
     audio.toneNode.detune.setValueAtTime(evt.target.valueAsNumber, audio.context.currentTime);
@@ -196,9 +315,7 @@ async function runTrial(trialConfig, audio) {
 
   const slider = document.getElementById('pitchSlider');
 
-  const randStartCents = genStartCents(trialConfig.prevResponse);
-
-  slider.value = randStartCents;
+  slider.value = startCents;
 
   slider.addEventListener('input', handleSlider);
   slider.dispatchEvent(new CustomEvent('input'));
@@ -209,12 +326,43 @@ async function runTrial(trialConfig, audio) {
   await waitForPeriod(1.8);
 
   pitchItems.style.visibility = "visible";
+  timerElement.style.visibility = "visible";
 
   fadeVolume('in', audio);
-  audio.toneNode.start();
   audio.context.resume();
+
+  // started
+
+  function updateTimer() {
+
+    const maxTime = 15.0;
+
+    const currTime = performance.now();
+
+    const timeElapsed = currTime - startTime;
+
+    const timeRemaining = Math.round(maxTime - (timeElapsed / 1000));
+
+    timerElement.innerHTML = `Time remaining: ${timeRemaining}`;
+
+    if ((timeElapsed / 1000) > maxTime) {
+      continueButton.dispatchEvent(new CustomEvent('mouseup'));
+    }
+
+  }
+
+  const startTime = performance.now();
+  const startDate = new Date();
+
+  updateTimer();
+  const timerHandle = setInterval(updateTimer, 1000);
   
   await waitForButtonClick('pitchContinueButton');
+
+  const finishTime = performance.now();
+  const finishDate = new Date();
+
+  const responseTime = (finishTime - startTime) / 1000;
 
   fadeVolume('out', audio);
 
@@ -224,8 +372,30 @@ async function runTrial(trialConfig, audio) {
   audio.context.suspend();
   slider.removeEventListener('input', handleSlider);
 
+  clearInterval(timerHandle);
   
   hideOverlay('pitchOverlayContainer');
+
+  const chosenCents = slider.valueAsNumber;
+  const chosenFreq = centsToFreq(chosenCents, BASE_FREQ);
+
+  const startFreq = centsToFreq(startCents, BASE_FREQ);
+
+  const trialData = {
+    isPractice,
+    blockNumber,
+    trialNumber,
+    startDate,
+    finishDate,
+    responseTime,
+    note,
+    chosenCents,
+    chosenFreq,
+    startCents,
+    startFreq,
+  };
+
+  return trialData;
 
 }
 
@@ -314,4 +484,14 @@ function randomInteger(min, max) {
   return Math.round(rand);
 }
 
+function convertToCSV(arr) {
+  // from https://stackoverflow.com/a/58769574
+  const array = [Object.keys(arr[0])].concat(arr)
+
+  return array.map(it => {
+    return Object.values(it).toString()
+  }).join('\n')
+}
+
 window.addEventListener("load", main);
+
