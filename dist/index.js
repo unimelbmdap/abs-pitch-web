@@ -462,6 +462,7 @@ async function runTrial(
   audio.toneNode.connect(audio.gainNode);
   fadeVolume('in', audio);
   audio.context.resume();
+  await waitForPeriod(FADE_DURATION_S);
 
   const startTimeMs = performance.now();
   const startDate = new Date();
