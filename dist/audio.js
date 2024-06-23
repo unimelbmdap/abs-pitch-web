@@ -12,9 +12,9 @@ export function initAudio() {
   audio.noiseNode = audio.context.createBufferSource();
   audio.noiseNode.loop = true;
 
+  audio.toneNode.start();
   createNoise(audio);
 
-  //audio.toneNode.connect(audio.gainNode);
   audio.gainNode.connect(audio.masterGainNode);
   audio.masterGainNode.connect(audio.context.destination);
 

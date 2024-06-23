@@ -36,31 +36,126 @@ async function main() {
 
   const audio = initAudio();
 
-  const trialConfig = {};
-
-  audio.toneNode.start();
+  let taskData = await runTask({prevResponse:undefined, prevNote:undefined, audio});
+  //await runVolumeSetting(audio);
 
   // practice trials
+  let practiceData = await runPractice(audio);
 
-  //let data = await runPractice(audio);
+  const prevTrial = practiceData[practiceData.length - 1];
+  const prevResponse = prevTrial.chosenCents;
+  const prevNote = prevTrial.note;
 
-  let data = await runBlock(
-    1,
-    true,
-    audio,
-  );
+  // experiment trials
+  //let taskData = await runTask({prevResponse, prevNote, audio});
 
-  let csv = convertToCSV(data);
+  runFinish(data);
 
-  saveData(csv);
+  audio.toneNode.stop();
+  audio.context.suspend();
 
-  await runVolumeSetting(audio);
+  runFinal();
 
 
 }
 
+function runFinal() {
 
-async function runBlock(blockNumber, isPractice, audio, prevNote, prevResponse) {
+  const textContainer = document.getElementById('textOverlayText');
+  textContainer.innerHTML = `
+  <p>The session is now complete.</p>
+  <p>Please email the results file to the coordinator of the study.</p>
+  <p>You may now close this window or tab.</p>
+  `;
+
+  const button = document.getElementById('textButton');
+  button.style.display = "none";
+
+  showOverlay('textOverlayContainer');
+  await waitForButtonClick('textButton');
+  hideOverlay('textOverlayContainer');
+
+}
+
+function runFinish(data) {
+
+  const textContainer = document.getElementById('textOverlayText');
+  textContainer.innerHTML = `
+  <p>The task is now complete.</p>
+  <p>When you press the button below, the results will be downloaded to a file on your computer.</p>
+  <p>Your web browser may save this file in an automatic location or it may open a 'Save As' window.</p>
+  `;
+
+  const button = document.getElementById('textButton');
+  button.innerHTML = 'Download results';
+
+  showOverlay('textOverlayContainer');
+  await waitForButtonClick('textButton');
+  hideOverlay('textOverlayContainer');
+
+  let csv = convertToCSV(data);
+  saveData(csv);
+
+}
+
+
+async function runTask({prevResponse, prevNote, audio} = {}) {
+
+  const nBlocks = 3;
+
+  const textContainer = document.getElementById('textOverlayText');
+  textContainer.innerHTML = `
+  <p>We will now begin the trials for the main task.</p>
+  <p>There will be 3 blocks, each containing 12 trials, with a self-paced break in between blocks.</p>
+  `;
+
+  const button = document.getElementById('textButton');
+  button.innerHTML = 'Begin trials';
+
+  showOverlay('textOverlayContainer');
+  await waitForButtonClick('textButton');
+  hideOverlay('textOverlayContainer');
+
+  let data = [];
+
+  for (let blockNumber=1; blockNumber <= nBlocks; blockNumber++ ) {
+
+    let blockData = await runBlock(
+      {
+        blockNumber: blockNumber,
+        isPractice: false,
+        audio: audio,
+        prevNote: prevNote,
+        prevResponse: prevResponse,
+      },
+    );
+
+    data = data.concat(blockData);
+
+    if (blockNumber !== nBlocks) {
+      let lastTrial = blockData[blockData.length - 1];
+      prevNote = lastTrial.note;
+      prevResponse = lastTrial.chosenCents;
+
+      textContainer.innerHTML = `
+      <p>You have now completed block ${blockNumber} / ${nBlocks}.</p>
+      <p>Please take a short break and press the button below when ready to commence the next block.</p>
+      `;
+
+      const button = document.getElementById('textButton');
+
+      showOverlay('textOverlayContainer');
+      await waitForButtonClick('textButton');
+      hideOverlay('textOverlayContainer');
+
+    }
+  }
+
+  return data;
+
+}
+
+async function runBlock({blockNumber, isPractice, audio, prevNote, prevResponse} = {}) {
 
   prevNote = prevNote ?? randomChoice(Object.keys(NOTES));
   prevResponse = prevResponse ?? randomChoice(SCALE_CENTS);
@@ -101,37 +196,29 @@ async function runBlock(blockNumber, isPractice, audio, prevNote, prevResponse) 
 
 async function runPractice(audio) {
 
-  const nPracTrials = 3;
+  const textContainer = document.getElementById('textOverlayText');
+  textContainer.innerHTML = `
+  <p>We will begin with three practice trials.</p>
+  <p>Each trial will begin with a note being displayed on the screen.</p>
+  <p>A slider will then appear below the note and a tone will begin playing.</p>
+  <p>You can alter the pitch of the tone by moving the location on the slider.</p>
+  <p>When you believe that the pitch of the tone matches the note, press the <code>Continue</code> button.</p>
+  `;
 
-  const practiceSequence = genBlockSequence(
-    randomChoice(Object.keys(NOTES)),
-    true,
-  ).slice(0, nPracTrials);
+  const button = document.getElementById('textButton');
+  button.innerHTML = 'Begin practice trials';
 
-  let data = [];
+  showOverlay('textOverlayContainer');
+  await waitForButtonClick('textButton');
+  hideOverlay('textOverlayContainer');
 
-  let prevResponse = randomChoice(SCALE_CENTS);
-
-  for (let [iTrial, note] of practiceSequence.entries()) {
-
-    let trialNumber = iTrial + 1;
-
-    let startCents = genStartCents(prevResponse);
-
-    let trialData = await runTrial(
-      note,
-      startCents,
-      1,
-      trialNumber,
-      true,
-      audio,
-    );
-
-    data.push(trialData);
-
-    prevResponse = trialData.chosenCents;
-
-  }
+  let data = await runBlock(
+    {
+      blockNumber: 1,
+      isPractice: true,
+      audio: audio,
+    },
+  );
 
   return data;
 
@@ -238,9 +325,16 @@ function genBlockSequence(lastNote, isPractice = false) {
 
 
 async function runStartPhase() {
-  showOverlay('startOverlayContainer');
-  await waitForButtonClick('startButton');
-  hideOverlay('startOverlayContainer');
+
+  const textContainer = document.getElementById('textOverlayText');
+  textContainer.innerHTML = '<p>Press the button below to begin the task.</p>';
+
+  const button = document.getElementById('textButton');
+  button.innerHTML = 'Begin task';
+
+  showOverlay('textOverlayContainer');
+  await waitForButtonClick('textButton');
+  hideOverlay('textOverlayContainer');
 }
 
 
@@ -299,7 +393,6 @@ async function runTrial(note, startCents, blockNumber, trialNumber, isPractice, 
   const continueButton = document.getElementById('pitchContinueButton');
 
   audio.toneNode.frequency.value = 196;
-  audio.toneNode.connect(audio.gainNode);
 
   const pitchItems = document.getElementById('pitchItems');
 
@@ -328,6 +421,7 @@ async function runTrial(note, startCents, blockNumber, trialNumber, isPractice, 
   pitchItems.style.visibility = "visible";
   timerElement.style.visibility = "visible";
 
+  audio.toneNode.connect(audio.gainNode);
   fadeVolume('in', audio);
   audio.context.resume();
 
@@ -368,7 +462,7 @@ async function runTrial(note, startCents, blockNumber, trialNumber, isPractice, 
 
   await waitForPeriod(0.5);
 
-  audio.toneNode.stop();
+  audio.toneNode.disconnect();
   audio.context.suspend();
   slider.removeEventListener('input', handleSlider);
 
