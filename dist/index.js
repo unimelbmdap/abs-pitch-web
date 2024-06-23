@@ -47,7 +47,7 @@ const N_BLOCKS = 3;
 const MIN_DELTA_CENTS = 1250;
 const NOTE_DISPLAY_TIME_S = 1.8;
 const MAX_TIME_S = 15.0;
-const FADE_DURATION_S = 0.1;
+const FADE_DURATION_S = 0.05;
 const SAVE_FILENAME = 'ap_task_results.csv';
 
 async function main() {
@@ -459,9 +459,9 @@ async function runTrial(
   timerElement.style.visibility = 'visible';
 
   // and start playing the tone
-  audio.toneNode.connect(audio.gainNode);
-  fadeVolume('in', audio);
   audio.context.resume();
+  fadeVolume('in', audio);
+  audio.toneNode.connect(audio.gainNode);
   await waitForPeriod(FADE_DURATION_S);
 
   const startTimeMs = performance.now();
@@ -482,7 +482,6 @@ async function runTrial(
 
   // fade rather than immediately silencing to avoid clicks
   // make sure we aren't fading in
-  await waitForPeriod(FADE_DURATION_S);
   fadeVolume('out', audio);
   await waitForPeriod(0.5);
 
@@ -647,6 +646,8 @@ function fadeVolume(direction, audio, duration = FADE_DURATION_S) {
     amplitudes[0] = 1.0;
     amplitudes[1] = 0.0;
   }
+
+  audio.masterGainNode.gain.cancelScheduledValues(audio.context.currentTime);
 
   audio.masterGainNode.gain.setValueCurveAtTime(
     amplitudes,
