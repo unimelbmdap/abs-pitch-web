@@ -253,7 +253,7 @@ async function runBlock(
 
     const trialNumber = iTrial + 1;
 
-    const startCents = genStartCents(prevResponse);
+    const startCents = genStartCents(prevResponse, isPractice);
 
     const trialData = await runTrial(
       {
@@ -368,7 +368,6 @@ function genStartCents(prevResponse, isPractice = false) {
       for (const note of ['A', 'C', 'G']) {
         const dist = centsFromNote(candCents, note);
         if (dist <= 150) {
-          console.log(candCents);
           ok = false;
         }
       }
