@@ -476,6 +476,8 @@ async function runTrial(
 
   const finishDate = new Date();
 
+  hideOverlay('pitchOverlayContainer');
+
   const responseTimeS = (finishTimeMs - startTimeMs) / 1000;
 
   // fade rather than immediately silencing to avoid clicks
@@ -489,8 +491,6 @@ async function runTrial(
   slider.removeEventListener('input', handleSlider);
 
   clearInterval(timerHandle);
-
-  hideOverlay('pitchOverlayContainer');
 
   // get selected cents from the slider
   const chosenCents = slider.valueAsNumber;
