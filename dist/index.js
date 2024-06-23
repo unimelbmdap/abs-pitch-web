@@ -481,6 +481,8 @@ async function runTrial(
   const responseTimeS = (finishTimeMs - startTimeMs) / 1000;
 
   // fade rather than immediately silencing to avoid clicks
+  // make sure we aren't fading in
+  await waitForPeriod(FADE_DURATION_S);
   fadeVolume('out', audio);
   await waitForPeriod(0.5);
 
