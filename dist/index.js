@@ -47,7 +47,7 @@ const N_BLOCKS = 3;
 const MIN_DELTA_CENTS = 1250;
 const NOTE_DISPLAY_TIME_S = 1.8;
 const MAX_TIME_S = 15.0;
-const FADE_DURATION_S = 0.05;
+const FADE_DURATION_S = 0.1;
 const SAVE_FILENAME = 'ap_task_results.csv';
 
 async function main() {
@@ -454,15 +454,15 @@ async function runTrial(
   // just show the note for a period of time
   await waitForPeriod(NOTE_DISPLAY_TIME_S);
 
+  // and start playing the tone
+  audio.context.resume();
+  audio.toneNode.connect(audio.gainNode);
+  fadeVolume('in', audio);
+  await waitForPeriod(0.2);
+
   // now show the other elements
   pitchItems.style.visibility = 'visible';
   timerElement.style.visibility = 'visible';
-
-  // and start playing the tone
-  audio.context.resume();
-  fadeVolume('in', audio);
-  audio.toneNode.connect(audio.gainNode);
-  await waitForPeriod(FADE_DURATION_S);
 
   const startTimeMs = performance.now();
   const startDate = new Date();
@@ -481,7 +481,6 @@ async function runTrial(
   const responseTimeS = (finishTimeMs - startTimeMs) / 1000;
 
   // fade rather than immediately silencing to avoid clicks
-  // make sure we aren't fading in
   fadeVolume('out', audio);
   await waitForPeriod(0.5);
 
@@ -647,13 +646,30 @@ function fadeVolume(direction, audio, duration = FADE_DURATION_S) {
     amplitudes[1] = 0.0;
   }
 
-  audio.masterGainNode.gain.cancelScheduledValues(audio.context.currentTime);
+  // this is tricky because it requires the current audio context time
+  // but the resolution of that varies across browsers (e.g., firefox
+  // can be > 100 ms!).
+  // that means that the time that it happens is difficult to determine
+  // and there could still be other calls running
+  // so need to leave plenty of time around this function to avoid errors
 
-  audio.masterGainNode.gain.setValueCurveAtTime(
-    amplitudes,
-    audio.context.currentTime,
-    duration,
-  );
+  try {
+    audio.masterGainNode.gain.setValueCurveAtTime(
+      amplitudes,
+      audio.context.currentTime,
+      duration,
+    );
+  } catch (err) {
+
+    console.error("Overlapping fade events");
+
+    if (direction === 'in') {
+      audio.masterGainNode.gain.value = 1.0;
+    } else {
+      audio.masterGainNode.gain.value = 0.0;
+    }
+
+  }
 
 }
 
