@@ -321,7 +321,7 @@ async function runBlock(
       },
     );
 
-    if (trialNumber === N_PRACTICE_TRIALS) {
+    if (trialNumber === N_PRACTICE_TRIALS && isPractice) {
       topStatusContainer.style.visibility = 'visible';
     } else {
       topStatusContainer.style.visibility = 'hidden';
@@ -613,6 +613,8 @@ async function runTrial(
 
 async function runTask({prevResponse, prevNote, audio} = {}) {
 
+  const textContainer = document.getElementById('textOverlayText');
+
   let data = [];
 
   for (let blockNumber=1; blockNumber <= N_BLOCKS; blockNumber++ ) {
@@ -635,8 +637,11 @@ async function runTask({prevResponse, prevNote, audio} = {}) {
       prevNote = lastTrial.note;
       prevResponse = lastTrial.chosenCents;
 
+      const button = document.getElementById('textButton');
+      button.innerHTML = 'Continue';
+
       textContainer.innerHTML = `
-      <p>You have now completed block ${blockNumber} / ${N_BLOCKS}.</p>
+      <p>You have now completed block ${blockNumber} of ${N_BLOCKS}.</p>
       <p>When you are ready to begin the next block, press continue.</p>
       <p>If you take a break, do not pause the video recording.</p>
       `;
@@ -712,7 +717,7 @@ async function saveData(data) {
   const dataHash = await MD5(data);  // eslint-disable-line
 
   const header = [
-    `# MD5: ${dataHash}`,
+    `# ${dataHash}`,
     `# BASE_FREQ: ${BASE_FREQ}`,
   ];
 
