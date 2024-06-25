@@ -10,13 +10,13 @@ html, body {
     position: relative;
     width: 100%;
     height: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 .overlayContainer {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    min-height: 100vh;
     width: 100vw;
     align-items: center;
     justify-content: center;
@@ -33,6 +33,12 @@ html, body {
     color: black;
     user-select: none;
     max-width: 800px;
+    margin-top: 60px;
+    margin-bottom: 60px;
+}
+
+.overlayJustified {
+  text-align: justify;
 }
 
 /*
@@ -43,7 +49,7 @@ html, body {
 */
 
 button {
-  font-size: 0.75rem;
+  font-size: 1rem;
 }
 
 code, samp, kbd {
@@ -56,6 +62,10 @@ code, samp, kbd {
 
 .bolden {
     font-weight: bold;
+}
+
+.centre {
+  text-align: center;
 }
 
 #pitchSlider {
@@ -71,4 +81,13 @@ code, samp, kbd {
   bottom: 0px;
   left: 32px;
   font-size: 1rem;
+}
+
+#topStatusContainer {
+  position: absolute;
+  top: 0px;
+  text-align: center;
+  width: 100vw;
+  font-size: 1rem;
+  visibility: hidden;
 }

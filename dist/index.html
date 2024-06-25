@@ -20,33 +20,118 @@
       <div id="textOverlayContainer" class="overlayContainer">
         <div id="textOverlayContent" class="overlayContent">
           <div id="textOverlayText">
+            <p style="margin-bottom: 96px;">
+Absolute Pitch in Singers: A Multimethods Study
+<br/>
+The University of Melbourne, Ethics ID 21169
+            </p>
+
+            <p style="margin-bottom: 96px;">
+Pitch Adjustment Task
+            </p>
+
+            <p>
+Press the button below to begin the task.
+            </p>
           </div>
 
-          <button id="textButton" type="button">Button text</button>
+          <button id="textButton" type="button">Begin</button>
         </div>
       </div>
+
+      <!-- overlay for the instructions -->
+      <div id="instructOverlayContainer" class="overlayContainer">
+        <div id="instructOverlayContent" class="overlayContent">
+
+          <div id="instructOverlayText">
+
+            <p class="center">
+            <span class="bolden">Instructions</span>
+            </p>
+
+            <div class="overlayJustified">
+
+              <p>
+  Choose a quiet location where you are unlikely to be interrupted. Switch your devices to silent mode and close any programs on your computer that produce sound alerts (e.g., Facebook Messenger, email).
+              </p>
+
+              <p>
+  You can wear headphones or listen through speakers. Instructions for adjusting your volume are on the next page.
+              </p>
+
+              <p>
+  If you are doing the task with Victoria on Zoom, she will video-record you.
+              </p>
+
+              <p>
+  If you are doing the task by yourself, you will need to video-record yourself in a single, continuous take. You will be notified when to start and stop recording.
+              </p>
+
+              <p>
+  In the task, you will adjust a slider to tune a pitch. Further details are included in a later slide. You will also be given 3 practice trials to familiarise yourself with the task.
+              </p>
+
+              <p>
+  The task consists of 3 blocks of 12 notes (36 pitches in total). You may take a break between blocks, but do not stop the video recording and do not check your previous responses.
+              </p>
+
+              <p>
+  The task should be completed only once. If you encounter an issue and need to redo it, please leave at least 15 minutes before reattempting it.
+              </p>
+
+              <p>
+              Scoring for this task assumes that A<sub>4</sub> = 440 Hz.
+              </p>
+
+              <p>
+  We will be measuring both your accuracy and response time. If you do not record a response within 15 seconds, the tone will stop, and the final pitch will be recorded as your response. When you do the task, a countdown timer is located in the bottom left corner of the screen.
+              </p>
+
+              <p>
+  When you finish the task, you will be instructed to download your responses and send them to us with your video. Instructions for this are included at the end of the task.
+              </p>
+
+              <p>
+  Make sure you are not able to see a pitch analyser (e.g. a tuner) when you do the task.
+              </p>
+
+              <p class="bolden">
+  Do not give yourself reference pitches and do not hum, sing, or whistle during the task. Doing so will invalidate your responses.
+              </p>
+
+            </div>
+
+          <button id="instructButton" type="button">Continue</button>
+        </div>
+      </div>
+
+      </div>
+          
 
       <!-- overlay for the volume -->
       <div id="volumeOverlayContainer" class="overlayContainer">
         <div id="volumeOverlayContent" class="overlayContent">
           <div>
+
             <p>
-Please ensure that you are wearing your headphones or earphones if you are not already doing so.
+Set your volume by adjusting the slider below.
             </p>
+
             <p>
-Use the slider below to set the volume for all the sounds that will be played during the tasks.
+            Start with a <span class="bolden">very low setting</span>, press the <code>Play</code> button, and then adjust the slider.
             </p>
+
             <p>
-              <span class="bolden">Please be careful to not set it to a level that is too high.</span>
+The volume should be loud but not uncomfortable.
             </p>
+
             <p>
-              Start with a <span class="bolden">very low</span> value, press the <code>Play</code> button, and then adjust the slider.
-              The sound will play in a loop, and you can press the button to toggle between playing and paused.
+You can press the button to toggle between playing and paused. 
             </p>
+
             <p>
-              The volume should be set so that the sound that is played is <span class="bolden">loud but not uncomfortable</span>.
+            When you have set the volume, press <code>Continue</code>.
             </p>
-          </div>
 
           <div>
             <button id="ppButton" type="button" autofocus>Play</button>
@@ -60,6 +145,8 @@ Use the slider below to set the volume for all the sounds that will be played du
           <button id="volumeContinueButton" type="button" disabled>Continue</button>
           </div>
         </div>
+      </div>
+
       </div>
 
       <!-- overlay for the task -->
@@ -88,6 +175,11 @@ Use the slider below to set the volume for all the sounds that will be played du
             </p>
           </div>
 
+          <div id="topStatusContainer">
+            <p id="topStatusText">
+              The task will begin after this trial.
+            </p>
+          </div>
       </div>
 
     </div>

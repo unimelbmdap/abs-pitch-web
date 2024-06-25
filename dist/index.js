@@ -25,6 +25,15 @@ for (
 ) {
   SCALE_CENTS.push(scaleValue);
 }
+const SCALE_OFFSET_MAX_CENTS = 48;
+const SCALE_OFFSETS_CENTS = [];
+for (
+  let scaleValue=-SCALE_OFFSET_MAX_CENTS;
+  scaleValue <= SCALE_OFFSET_MAX_CENTS;
+  scaleValue += SCALE_STEP_CENTS
+) {
+  SCALE_OFFSETS_CENTS.push(scaleValue);
+}
 
 // notes and their offsets in cents from `BASE_FREQ`
 const NOTES = {
@@ -54,11 +63,15 @@ async function main() {
 
   await runStartPhase();
 
+  await runInstructionsPhase();
+
   // can't initialise the audio until there has been a user interaction
   const audio = initAudio();
 
   // allow the user to set a gain level
   await runVolumeSetting(audio);
+
+  await runRecordingStartPhase();
 
   // practice trials
   const practiceData = await runPractice(audio);
@@ -86,17 +99,18 @@ async function main() {
 }
 
 async function runStartPhase() {
-
-  const textContainer = document.getElementById('textOverlayText');
-  textContainer.innerHTML = '<p>Press the button below to begin the task.</p>';
-
-  const button = document.getElementById('textButton');
-  button.innerHTML = 'Begin task';
-
   showOverlay('textOverlayContainer');
   await waitForButtonClick('textButton');
   hideOverlay('textOverlayContainer');
 }
+
+
+async function runInstructionsPhase() {
+  showOverlay('instructOverlayContainer');
+  await waitForButtonClick('instructButton');
+  hideOverlay('instructOverlayContainer');
+}
+
 
 function initAudio() {
 
@@ -193,18 +207,61 @@ async function runVolumeSetting(audio) {
 
 }
 
+async function runRecordingStartPhase() {
+
+  const textContainer = document.getElementById('textOverlayText');
+  textContainer.innerHTML = `
+<p class="bolden">
+Your data can be included only if you submit a video recording of
+yourself doing the task. Your face needs to be visible in the video recording.
+</p>
+
+<p class="bolden">
+Start videorecording now.
+</p>
+  `;
+
+  const button = document.getElementById('textButton');
+  button.innerHTML = 'Continue';
+
+  showOverlay('textOverlayContainer');
+  await waitForButtonClick('textButton');
+  hideOverlay('textOverlayContainer');
+}
+
+
 async function runPractice(audio) {
 
   const textContainer = document.getElementById('textOverlayText');
   textContainer.innerHTML = `
-  <p>We will begin with three practice trials.</p>
-  <p>Each trial will begin with a note being displayed on the screen.</p>
-  <p>A slider will then appear below the note and a tone will begin
-  playing.</p>
-  <p>You can alter the pitch of the tone by moving the location on
-  the slider.</p>
-  <p>When you believe that the pitch of the tone matches the note,
-  press the <code>Continue</code> button.</p>
+  <p>
+The 3 practice trials will begin when you press the button below.
+  <p>
+
+  <p>
+Each trial will begin when a note name is displayed on the screen.
+  </p>
+
+  <p>
+A slider will then appear, and a tone will begin playing.
+  </p>
+
+  <p>
+You can alter the tone of the pitch by moving the location of the slider.
+  </p>
+
+  <p>
+When you believe the pitch of the tone matches the note,
+press the <code>Continue</code> button.
+  </p>
+
+  <p>
+The task will begin immediately after the 3rd practice trial.
+  </p>
+
+  <p class="bolden">
+Remember, do not hum, sing, or whistle during the task.
+  </p>
   `;
 
   const button = document.getElementById('textButton');
@@ -253,7 +310,22 @@ async function runBlock(
 
     const trialNumber = iTrial + 1;
 
-    const startCents = genStartCents(prevResponse, isPractice);
+    // pick a random value to shift the scale around by
+    const scaleOffsetCents = randomChoice(SCALE_OFFSETS_CENTS);
+
+    const startCents = genStartCents(
+      {
+        prevResponse,
+        scaleOffsetCents,
+        isPractice,
+      },
+    );
+
+    if (trialNumber === N_PRACTICE_TRIALS) {
+      topStatusContainer.style.visibility = 'visible';
+    } else {
+      topStatusContainer.style.visibility = 'hidden';
+    }
 
     const trialData = await runTrial(
       {
@@ -263,6 +335,7 @@ async function runBlock(
         trialNumber,
         isPractice,
         audio,
+        scaleOffsetCents,
       },
     );
 
@@ -339,9 +412,18 @@ function genBlockSequence(lastNote, isPractice = false) {
 
 }
 
-function genStartCents(prevResponse, isPractice = false) {
+function genStartCents(
+  {
+    prevResponse,
+    scaleOffsetCents,
+    isPractice = false,
+  } = {},
+) {
 
   let candCents;
+
+  // adjust the scale to take into account the offset
+  const scaleCents = SCALE_CENTS.map((item) => item + scaleOffsetCents);
 
   let ok = false;
 
@@ -350,7 +432,7 @@ function genStartCents(prevResponse, isPractice = false) {
     ok = true;
 
     // pick a random value from the scale as a candidate
-    candCents = randomChoice(SCALE_CENTS);
+    candCents = randomChoice(scaleCents);
 
     // not OK if it is too close to the previous response
     if (Math.abs(candCents - prevResponse) <= MIN_DELTA_CENTS) {
@@ -364,10 +446,10 @@ function genStartCents(prevResponse, isPractice = false) {
 
     if (isPractice) {
 
-      // can't be within 150 cents of A, C, G
+      // can't be within 75 cents of A, C, G
       for (const note of ['A', 'C', 'G']) {
         const dist = centsFromNote(candCents, note);
-        if (dist <= 150) {
+        if (dist <= 75) {
           ok = false;
         }
       }
@@ -399,7 +481,15 @@ function centsFromNote(cents, note) {
 }
 
 async function runTrial(
-  {note, startCents, blockNumber, trialNumber, isPractice, audio} = {},
+  {
+    note,
+    startCents,
+    blockNumber,
+    trialNumber,
+    isPractice,
+    audio,
+    scaleOffsetCents,
+  } = {},
 ) {
 
   // grab some elements that will be needed
@@ -412,6 +502,10 @@ async function runTrial(
   // we want to just show the note by itself first, so hide the other elements
   pitchItems.style.visibility = 'hidden';
   timerElement.style.visibility = 'hidden';
+
+  // shift the endpoints of the slider
+  slider.min = SCALE_MIN_CENTS + scaleOffsetCents;
+  slider.max = SCALE_MAX_CENTS + scaleOffsetCents;
 
   // set the note text
   noteText.innerHTML = note;
@@ -510,6 +604,7 @@ async function runTrial(
     chosenFreq,
     startCents,
     startFreq,
+    scaleOffsetCents,
   };
 
   return trialData;
@@ -517,20 +612,6 @@ async function runTrial(
 }
 
 async function runTask({prevResponse, prevNote, audio} = {}) {
-
-  const textContainer = document.getElementById('textOverlayText');
-  textContainer.innerHTML = `
-  <p>We will now begin the trials for the main task.</p>
-  <p>There will be ${N_BLOCKS} blocks, each containing 12 trials, with a
-  self-paced break in between blocks.</p>
-  `;
-
-  const button = document.getElementById('textButton');
-  button.innerHTML = 'Begin trials';
-
-  showOverlay('textOverlayContainer');
-  await waitForButtonClick('textButton');
-  hideOverlay('textOverlayContainer');
 
   let data = [];
 
@@ -556,8 +637,8 @@ async function runTask({prevResponse, prevNote, audio} = {}) {
 
       textContainer.innerHTML = `
       <p>You have now completed block ${blockNumber} / ${N_BLOCKS}.</p>
-      <p>Please take a short break and press the button below when
-      ready to commence the next block.</p>
+      <p>When you are ready to begin the next block, press continue.</p>
+      <p>If you take a break, do not pause the video recording.</p>
       `;
 
       showOverlay('textOverlayContainer');
@@ -575,15 +656,46 @@ async function runFinish(data) {
 
   const textContainer = document.getElementById('textOverlayText');
   textContainer.innerHTML = `
-  <p>The task is now complete.</p>
-  <p>When you press the button below, the results will be downloaded
-  to a file on your computer.</p>
-  <p>Your web browser may save this file in an automatic location or
-  it may open a 'Save As' window.</p>
+
+  <p class="bolden">Continue videorecording.</p>
+
+  <p>
+You have now completed the task.
+  </p>
+
+  <p>
+When you press the button below, your data will be downloaded
+as a file on your computer. 
+  </p>
+
+  <p>
+Your web browser may save the file in an automatic location,
+or it may open a 'Save As' window.
+  </p>
+
+  <p>
+You will need to remember where you save the file so that you
+can send it to us.
+  </p>
+
+  <p>
+If you have the option to name the file when you download it,
+use the first 3 letters of your first name and the 1st letter of
+your surname. E.g., <span class="bolden">Jan</span>e 
+<span class="bolden">D</span>oe would name the file [JanD].
+  </p>
+
+  <p class="bolden">
+Do not make any changes to your data file.
+  </p>
+
+  <p>
+The next screen will give you instructions on how to send us your file.
+  </p>
   `;
 
   const button = document.getElementById('textButton');
-  button.innerHTML = 'Download results';
+  button.innerHTML = 'Download Data File';
 
   showOverlay('textOverlayContainer');
   await waitForButtonClick('textButton');
@@ -622,9 +734,57 @@ function runFinal() {
 
   const textContainer = document.getElementById('textOverlayText');
   textContainer.innerHTML = `
-  <p>The session is now complete.</p>
-  <p>Please email the results file to the coordinator of the study.</p>
-  <p>You may now close this window or tab.</p>
+
+<p class="bolden">
+Continue videorecording.
+</p>
+
+<p>
+If you have not already named your file, rename it now.
+Use the first 3 letters of your first name and the 1st letter
+of your surname. E.g., <span class="bolden">Jan</span>e 
+<span class="bolden">D</span>oe would be [JanD].
+</p>
+
+<p>
+Share your file with us by clicking on the following link and 
+dragging and dropping the file onto the icon. If you are unable
+to do this, you can email it to Victoria (email address below).
+</p>
+
+<p>
+ <a href="https://unimelbcloud-my.sharepoint.com/:f:/g/personal/vlambourn_student_unimelb_edu_au/ErimROG7oHRMiqF8kvJsvAQBZBdvCFBnrBHp-sRpThnj2Q?e=WINdiR">https://unimelbcloud-my.sharepoint.com/:f:/g/personal/vlambourn_student_unimelb_edu_au/ErimROG7oHRMiqF8kvJsvAQBZBdvCFBnrBHp-sRpThnj2Q?e=WINdiR</a>
+ </p>
+
+<p>
+Once you have submitted your data file, you can
+<span class="bolden">stop videorecording</span>.
+</p>
+
+<p>
+Save your video using the same file name as your data file (e.g., JanD).
+</p>
+
+<p>
+Upload your video to
+<a href="https://unimelbcloud-my.sharepoint.com/:f:/g/personal/vlambourn_student_unimelb_edu_au/Evo052SnNmBAvUKDdGlLlLYBq2DrotONFcJNYP89G0yKPw?e=Le3ZNJ">https://unimelbcloud-my.sharepoint.com/:f:/g/personal/vlambourn_student_unimelb_edu_au/Evo052SnNmBAvUKDdGlLlLYBq2DrotONFcJNYP89G0yKPw?e=Le3ZNJ</a>
+<br/>
+or email it to
+<a href="mailto:vlambourn@student.unimelb.edu.au">
+vlambourn@student.unimelb.edu.au</a>
+</p>
+
+<p>
+By submitting your data, you are consenting to take part in this research.
+</p>
+
+<p class="bolden">
+Thank you for your participation.
+</p>
+
+<p>
+You may now close this window or tab.
+</p>
   `;
 
   const button = document.getElementById('textButton');
@@ -661,7 +821,7 @@ function fadeVolume(direction, audio, duration = FADE_DURATION_S) {
     );
   } catch (err) {
 
-    console.error("Overlapping fade events");
+    console.error('Overlapping fade events');
 
     if (direction === 'in') {
       audio.masterGainNode.gain.value = 1.0;
