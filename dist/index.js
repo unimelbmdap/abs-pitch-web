@@ -61,13 +61,6 @@ const SAVE_FILENAME = 'ap_task_results.csv';
 
 async function main() {
 
-  try {
-    const dataHash = await digestMessage('test\ntest2');
-    console.log(dataHash)
-  } catch (err) {
-    console.error('Cannot hash');
-  }
-
   await runStartPhase();
 
   await runInstructionsPhase();
@@ -730,7 +723,14 @@ The next screen will give you instructions on how to send us your file.
 
 async function saveData(data) {
 
-  const dataHash = await digestMessage(data);
+  let dataHash;
+
+  try {
+    dataHash = await digestMessage(data);
+  } catch (err) {
+    console.error('Cannot hash');
+    dataHash = 'UNKNOWN';
+  }
 
   const header = [
     `# ${dataHash}`,
@@ -925,12 +925,12 @@ function convertToCSV(arr) {
 
 // from https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest#converting_a_digest_to_a_hex_string
 async function digestMessage(message) {
-  const msgUint8 = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
-  const hashBuffer = await window.crypto.subtle.digest("SHA-256", msgUint8); // hash the message
-  const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
+  const msgUint8 = new TextEncoder().encode(message);
+  const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgUint8);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
   const hashHex = hashArray
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join(""); // convert bytes to hex string
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
   return hashHex;
 }
 
