@@ -774,7 +774,7 @@ to do this, you can email it to Victoria (email address below).
 </p>
 
 <p>
- <a href="https://unimelbcloud-my.sharepoint.com/:f:/g/personal/vlambourn_student_unimelb_edu_au/ErimROG7oHRMiqF8kvJsvAQBZBdvCFBnrBHp-sRpThnj2Q?e=WINdiR">https://unimelbcloud-my.sharepoint.com/:f:/g/personal/vlambourn_student_unimelb_edu_au/ErimROG7oHRMiqF8kvJsvAQBZBdvCFBnrBHp-sRpThnj2Q?e=WINdiR</a>
+ <a href="https://unimelbcloud-my.sharepoint.com/:f:/g/personal/vlambourn_student_unimelb_edu_au/ErimROG7oHRMiqF8kvJsvAQBZBdvCFBnrBHp-sRpThnj2Q?e=WINdiR" target="_blank">https://unimelbcloud-my.sharepoint.com/:f:/g/personal/vlambourn_student_unimelb_edu_au/ErimROG7oHRMiqF8kvJsvAQBZBdvCFBnrBHp-sRpThnj2Q?e=WINdiR</a>
  </p>
 
 <p>
@@ -788,10 +788,10 @@ Save your video using the same file name as your data file (e.g., JanD).
 
 <p>
 Upload your video to
-<a href="https://unimelbcloud-my.sharepoint.com/:f:/g/personal/vlambourn_student_unimelb_edu_au/Evo052SnNmBAvUKDdGlLlLYBq2DrotONFcJNYP89G0yKPw?e=Le3ZNJ">https://unimelbcloud-my.sharepoint.com/:f:/g/personal/vlambourn_student_unimelb_edu_au/Evo052SnNmBAvUKDdGlLlLYBq2DrotONFcJNYP89G0yKPw?e=Le3ZNJ</a>
+<a href="https://unimelbcloud-my.sharepoint.com/:f:/g/personal/vlambourn_student_unimelb_edu_au/Evo052SnNmBAvUKDdGlLlLYBq2DrotONFcJNYP89G0yKPw?e=Le3ZNJ" target="_blank">https://unimelbcloud-my.sharepoint.com/:f:/g/personal/vlambourn_student_unimelb_edu_au/Evo052SnNmBAvUKDdGlLlLYBq2DrotONFcJNYP89G0yKPw?e=Le3ZNJ</a>
 <br/>
 or email it to
-<a href="mailto:vlambourn@student.unimelb.edu.au">
+<a href="mailto:vlambourn@student.unimelb.edu.au" target="_blank">
 vlambourn@student.unimelb.edu.au</a>
 </p>
 
