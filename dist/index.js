@@ -9,6 +9,11 @@ June 2024
 
 */
 
+const urlParams = new URLSearchParams(document.location.search);
+
+// use a `noteLang=` URL parameter, defaulting to english
+const noteLang = (urlParams.get('noteLang') ?? 'en').toLowerCase();
+
 // base frequency against which units in cents are measured
 // this is a G note
 const BASE_FREQ = 196;
@@ -36,20 +41,45 @@ for (
 }
 
 // notes and their offsets in cents from `BASE_FREQ`
-const NOTES = {
-  'A♭': 100,
-  'A': 200,
-  'B♭': 300,
-  'B': 400,
-  'C': 500,
-  'C#': 600,
-  'D': 700,
-  'E♭': 800,
-  'E': 900,
-  'F': 1000,
-  'F#': 1100,
-  'G': 0,
-};
+let NOTES;
+
+if (noteLang === 'en') {
+
+  NOTES = {
+    'A♭': 100,
+    'A': 200,
+    'B♭': 300,
+    'B': 400,
+    'C': 500,
+    'C#': 600,
+    'D': 700,
+    'E♭': 800,
+    'E': 900,
+    'F': 1000,
+    'F#': 1100,
+    'G': 0,
+  };
+
+} else if (noteLang === 'de') {
+
+  NOTES = {
+    'As': 100,
+    'A': 200,
+    'B': 300,
+    'H': 400,
+    'C': 500,
+    'Cis': 600,
+    'D': 700,
+    'Es': 800,
+    'E': 900,
+    'F': 1000,
+    'Fis': 1100,
+    'G': 0,
+  };
+
+} else {
+  throw new Error(`Unknown note language ${noteLang}`);
+}
 
 const N_PRACTICE_TRIALS = 3;
 const N_BLOCKS = 3;
